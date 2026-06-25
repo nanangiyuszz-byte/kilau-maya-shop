@@ -14,6 +14,11 @@ export const Route = createFileRoute("/")({
 });
 
 const LOGO_URL = "https://files.catbox.moe/3whqvw.png";
+const HERO_SLIDES = [
+  "https://files.catbox.moe/v50i58.png",
+  "https://files.catbox.moe/kwwzmj.png",
+  "https://files.catbox.moe/rk6rku.png",
+];
 
 function Index() {
   const [products, setProducts] = useState<Product[]>([]);
