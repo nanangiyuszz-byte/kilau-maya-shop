@@ -76,6 +76,11 @@ function Index() {
         </div>
       </header>
 
+      {/* Hero Carousel */}
+      <section className="mx-auto max-w-6xl px-3 pt-4 sm:px-6 sm:pt-6">
+        <HeroCarousel slides={HERO_SLIDES} />
+      </section>
+
       {/* Title */}
       <section className="mx-auto max-w-6xl px-3 pt-6 pb-4 sm:px-6 sm:pt-10">
         <div className="text-center">
