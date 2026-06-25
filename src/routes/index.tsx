@@ -135,18 +135,18 @@ function ProductCard({ product, onBuy }: { product: Product; onBuy: () => void }
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.3"; }}
         />
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-2 sm:p-3">
-        <h3 className="line-clamp-2 min-h-[2.5em] text-[11px] font-medium leading-tight sm:text-sm">
+      <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
+        <h3 className="line-clamp-2 min-h-[2.6em] text-sm font-medium leading-snug sm:text-sm">
           {product.name}
         </h3>
-        <p className="chrome-text text-[11px] font-bold sm:text-base">
+        <p className="chrome-text text-base font-bold sm:text-lg">
           {formatRupiah(product.price)}
         </p>
         <button
           onClick={onBuy}
-          className="chrome-btn mt-1 inline-flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold transition hover:brightness-110 active:scale-95 sm:text-xs"
+          className="chrome-btn mt-1.5 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition hover:brightness-110 active:scale-95 sm:text-sm"
         >
-          <ShoppingBag className="h-3 w-3" />
+          <ShoppingBag className="h-3.5 w-3.5" />
           <span>Beli</span>
         </button>
       </div>
