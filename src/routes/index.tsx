@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Search, ShoppingBag, Loader2, PackageOpen } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Search, ShoppingBag, Loader2, PackageOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase, formatRupiah, type Product } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
@@ -14,6 +14,11 @@ export const Route = createFileRoute("/")({
 });
 
 const LOGO_URL = "https://files.catbox.moe/3whqvw.png";
+const HERO_SLIDES = [
+  "https://files.catbox.moe/v50i58.png",
+  "https://files.catbox.moe/kwwzmj.png",
+  "https://files.catbox.moe/rk6rku.png",
+];
 
 function Index() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -71,6 +76,11 @@ function Index() {
         </div>
       </header>
 
+      {/* Hero Carousel */}
+      <section className="mx-auto max-w-6xl px-3 pt-4 sm:px-6 sm:pt-6">
+        <HeroCarousel slides={HERO_SLIDES} />
+      </section>
+
       {/* Title */}
       <section className="mx-auto max-w-6xl px-3 pt-6 pb-4 sm:px-6 sm:pt-10">
         <div className="text-center">
@@ -102,7 +112,7 @@ function Index() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
             {filtered.map((p) => (
               <ProductCard key={p.id} product={p} onBuy={() => handleBuy(p)} />
             ))}
@@ -125,21 +135,91 @@ function ProductCard({ product, onBuy }: { product: Product; onBuy: () => void }
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.3"; }}
         />
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-2 sm:p-3">
-        <h3 className="line-clamp-2 min-h-[2.5em] text-[11px] font-medium leading-tight sm:text-sm">
+      <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
+        <h3 className="line-clamp-2 min-h-[2.6em] text-sm font-medium leading-snug sm:text-sm">
           {product.name}
         </h3>
-        <p className="chrome-text text-[11px] font-bold sm:text-base">
+        <p className="chrome-text text-base font-bold sm:text-lg">
           {formatRupiah(product.price)}
         </p>
         <button
           onClick={onBuy}
-          className="chrome-btn mt-1 inline-flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold transition hover:brightness-110 active:scale-95 sm:text-xs"
+          className="chrome-btn mt-1.5 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition hover:brightness-110 active:scale-95 sm:text-sm"
         >
-          <ShoppingBag className="h-3 w-3" />
+          <ShoppingBag className="h-3.5 w-3.5" />
           <span>Beli</span>
         </button>
       </div>
     </article>
+  );
+}
+
+function HeroCarousel({ slides }: { slides: string[] }) {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % slides.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, [paused, slides.length]);
+
+  const go = (i: number) => setIndex(((i % slides.length) + slides.length) % slides.length);
+
+  return (
+    <div
+      className="glass-strong relative overflow-hidden rounded-2xl shadow-2xl sm:rounded-3xl"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        if (touchStartX.current == null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
+        touchStartX.current = null;
+      }}
+    >
+      <div className="relative aspect-[16/9] w-full sm:aspect-[21/9]">
+        {slides.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={`Slide ${i + 1}`}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}
+            draggable={false}
+          />
+        ))}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
+      </div>
+
+      <button
+        aria-label="Sebelumnya"
+        onClick={() => go(index - 1)}
+        className="absolute left-2 top-1/2 hidden -translate-y-1/2 rounded-full border border-white/20 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 sm:block"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button
+        aria-label="Berikutnya"
+        onClick={() => go(index + 1)}
+        className="absolute right-2 top-1/2 hidden -translate-y-1/2 rounded-full border border-white/20 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 sm:block"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+
+      <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5 sm:bottom-3">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            aria-label={`Ke slide ${i + 1}`}
+            onClick={() => go(i)}
+            className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-1.5 bg-white/50"}`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
