@@ -63,8 +63,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Katalog Premium" },
+      { title: "Produk iboystore" },
       { name: "description", content: "Katalog produk premium dengan desain mewah liquid chrome." },
+      { property: "og:title", content: "Produk iboystore" },
+      { name: "twitter:title", content: "Produk iboystore" },
+      { property: "og:description", content: "Katalog produk premium dengan desain mewah liquid chrome." },
+      { name: "twitter:description", content: "Katalog produk premium dengan desain mewah liquid chrome." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1b2012d6-b27f-4b93-bcd3-819007ab45ef/id-preview-5c85ca18--15d2c92b-f25a-4b7c-8fc3-4a5a00d26e13.lovable.app-1782374661246.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1b2012d6-b27f-4b93-bcd3-819007ab45ef/id-preview-5c85ca18--15d2c92b-f25a-4b7c-8fc3-4a5a00d26e13.lovable.app-1782374661246.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
