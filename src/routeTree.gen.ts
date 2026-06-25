@@ -9,8 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PanelRahasiaIboyRouteImport } from './routes/panel-rahasia-iboy'
 import { Route as IndexRouteImport } from './routes/index'
 
+const PanelRahasiaIboyRoute = PanelRahasiaIboyRouteImport.update({
+  id: '/panel-rahasia-iboy',
+  path: '/panel-rahasia-iboy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +25,39 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/panel-rahasia-iboy': typeof PanelRahasiaIboyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/panel-rahasia-iboy': typeof PanelRahasiaIboyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/panel-rahasia-iboy': typeof PanelRahasiaIboyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/panel-rahasia-iboy'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/panel-rahasia-iboy'
+  id: '__root__' | '/' | '/panel-rahasia-iboy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PanelRahasiaIboyRoute: typeof PanelRahasiaIboyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/panel-rahasia-iboy': {
+      id: '/panel-rahasia-iboy'
+      path: '/panel-rahasia-iboy'
+      fullPath: '/panel-rahasia-iboy'
+      preLoaderRoute: typeof PanelRahasiaIboyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PanelRahasiaIboyRoute: PanelRahasiaIboyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
