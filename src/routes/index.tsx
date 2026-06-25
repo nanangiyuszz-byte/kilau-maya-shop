@@ -1,29 +1,145 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Search, ShoppingBag, Loader2, PackageOpen } from "lucide-react";
+import { supabase, formatRupiah, type Product } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Katalog Produk — Premium Chrome" },
+      { name: "description", content: "Jelajahi koleksi produk premium kami." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const LOGO_URL = "https://files.catbox.moe/3whqvw.png";
+
 function Index() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!mounted) return;
+      if (error) setError(error.message);
+      else setProducts((data ?? []) as Product[]);
+      setLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p) => p.name.toLowerCase().includes(q));
+  }, [products, query]);
+
+  const handleBuy = (p: Product) => {
+    const num = p.whatsapp_number.replace(/[^0-9]/g, "");
+    const text = encodeURIComponent(
+      `Halo, saya tertarik untuk membeli produk ${p.name}. Bagaimana proses selanjutnya?`
+    );
+    window.open(`https://wa.me/${num}?text=${text}`, "_blank");
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-50 px-3 pt-3 pb-2 sm:px-6 sm:pt-4">
+        <div className="glass-strong mx-auto flex max-w-6xl items-center gap-2 rounded-2xl px-3 py-2.5 sm:gap-4 sm:px-5 sm:py-3">
+          <a href="/" className="flex shrink-0 items-center gap-2">
+            <img src={LOGO_URL} alt="Logo" className="h-8 w-8 rounded-lg object-contain sm:h-10 sm:w-10" />
+          </a>
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari produk..."
+              className="h-10 w-full rounded-xl border border-white/15 bg-white/5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-white/40 focus:bg-white/10"
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Title */}
+      <section className="mx-auto max-w-6xl px-3 pt-6 pb-4 sm:px-6 sm:pt-10">
+        <div className="text-center">
+          <h1 className="chrome-text font-display text-5xl font-bold tracking-tight sm:text-7xl">
+            PRODUK
+          </h1>
+          <div className="mx-auto mt-3 h-px w-24 bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+            Koleksi pilihan dengan kualitas premium
+          </p>
+        </div>
+      </section>
+
+      {/* Grid */}
+      <main className="mx-auto max-w-6xl px-3 pb-16 sm:px-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-white/70" />
+          </div>
+        ) : error ? (
+          <div className="glass mx-auto max-w-md rounded-2xl p-6 text-center">
+            <p className="text-sm text-destructive">Gagal memuat produk: {error}</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="glass mx-auto max-w-md rounded-2xl p-8 text-center">
+            <PackageOpen className="mx-auto h-10 w-10 text-white/60" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              {query ? "Tidak ada produk yang cocok." : "Belum ada produk."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} onBuy={() => handleBuy(p)} />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
+  );
+}
+
+function ProductCard({ product, onBuy }: { product: Product; onBuy: () => void }) {
+  return (
+    <article className="glass group flex flex-col overflow-hidden rounded-xl transition hover:-translate-y-0.5 hover:shadow-2xl">
+      <div className="relative aspect-square w-full overflow-hidden bg-black/30">
+        <img
+          src={product.image_url}
+          alt={product.name}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.3"; }}
+        />
+      </div>
+      <div className="flex flex-1 flex-col gap-1 p-2 sm:p-3">
+        <h3 className="line-clamp-2 min-h-[2.5em] text-[11px] font-medium leading-tight sm:text-sm">
+          {product.name}
+        </h3>
+        <p className="chrome-text text-[11px] font-bold sm:text-base">
+          {formatRupiah(product.price)}
+        </p>
+        <button
+          onClick={onBuy}
+          className="chrome-btn mt-1 inline-flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold transition hover:brightness-110 active:scale-95 sm:text-xs"
+        >
+          <ShoppingBag className="h-3 w-3" />
+          <span>Beli</span>
+        </button>
+      </div>
+    </article>
   );
 }
