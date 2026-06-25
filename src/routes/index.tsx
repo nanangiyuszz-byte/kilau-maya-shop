@@ -153,3 +153,73 @@ function ProductCard({ product, onBuy }: { product: Product; onBuy: () => void }
     </article>
   );
 }
+
+function HeroCarousel({ slides }: { slides: string[] }) {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % slides.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, [paused, slides.length]);
+
+  const go = (i: number) => setIndex(((i % slides.length) + slides.length) % slides.length);
+
+  return (
+    <div
+      className="glass-strong relative overflow-hidden rounded-2xl shadow-2xl sm:rounded-3xl"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        if (touchStartX.current == null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
+        touchStartX.current = null;
+      }}
+    >
+      <div className="relative aspect-[16/9] w-full sm:aspect-[21/9]">
+        {slides.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={`Slide ${i + 1}`}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}
+            draggable={false}
+          />
+        ))}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
+      </div>
+
+      <button
+        aria-label="Sebelumnya"
+        onClick={() => go(index - 1)}
+        className="absolute left-2 top-1/2 hidden -translate-y-1/2 rounded-full border border-white/20 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 sm:block"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button
+        aria-label="Berikutnya"
+        onClick={() => go(index + 1)}
+        className="absolute right-2 top-1/2 hidden -translate-y-1/2 rounded-full border border-white/20 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 sm:block"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+
+      <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5 sm:bottom-3">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            aria-label={`Ke slide ${i + 1}`}
+            onClick={() => go(i)}
+            className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-1.5 bg-white/50"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
