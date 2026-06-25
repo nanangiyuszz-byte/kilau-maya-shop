@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, ShoppingBag, Loader2, PackageOpen } from "lucide-react";
+import { Search, ShoppingBag, Loader2, PackageOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase, formatRupiah, type Product } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
