@@ -407,10 +407,7 @@ function ProfilePanel() {
             <span className="chrome-btn flex h-10 w-10 items-center justify-center rounded-lg">
               <Icon className="h-4 w-4" />
             </span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-white">{label}</p>
-              <p className="truncate text-xs text-white/50">{href.replace(/^https?:\/\//, "")}</p>
-            </div>
+            <p className="flex-1 text-sm font-semibold text-white">{label}</p>
           </a>
         ))}
       </div>
